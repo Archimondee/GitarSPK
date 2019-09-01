@@ -18,10 +18,10 @@ export default class HomeScreen extends Component {
               <Image source={require('../../assets/Logo.png')} resizeMode="contain" style={{width:200, height:200}}/>
             </View>
             <View style={{paddingTop:100}}>
-              <Button style={{width:200,alignItems:'center', justifyContent:'center', backgroundColor:'#08AE9E'}}>
+              <Button onPress={()=>this.props.navigation.navigate('Menu')} style={{width:200,alignItems:'center', justifyContent:'center', backgroundColor:'#08AE9E'}}>
                 <Text style={{color:'white'}}>Menu Utama</Text>
               </Button>
-              <Button style={{width:200, paddingTop:10, marginTop:10, alignItems:'center', justifyContent:'center', backgroundColor:'#08AE9E'}}>
+              <Button onPress={()=>this.props.navigation.navigate('Tentang')} style={{width:200, paddingTop:10, marginTop:10, alignItems:'center', justifyContent:'center', backgroundColor:'#08AE9E'}}>
                 <Text style={{color:'white'}}>Tentang</Text>
               </Button>
             </View>

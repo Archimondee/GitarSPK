@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, TouchableOpacity, ImageBackground } from 'react-native';
-import {Header, Button, Right, Left, Body} from 'native-base';
+import {Header, Button, Right, Left, Body, Card} from 'native-base';
 import PickerModal from 'react-native-picker-modal-view';
 import {Ionicons} from 'react-native-vector-icons'
 
@@ -19,7 +19,8 @@ export default class MenuScreen extends Component {
       selectedMerk:{},
       selectedHarga:{},
       selectedBahan: {},
-      selectedFrets: {}
+      selectedFrets: {},
+      filter: []
     };
   }
 
@@ -84,13 +85,78 @@ export default class MenuScreen extends Component {
     return selectFrets
   }
 
+  submitFilter(){
+    const {selectedSenar, selectedBahan, selectedHarga, selectedFrets, selectedMerk} = this.state;
+
+    let tanda = 0
+    
+    selectedBahan.Value?tanda+=1:null
+    selectedSenar.Value?tanda+=1:null
+    selectedHarga.Value?tanda+=1:null
+    selectedFrets.Value?tanda+=1:null
+    
+    if (tanda == 4){
+      
+      this.cariHasil();
+    }else{
+      alert('Terdapat filter yang kosong\nPeriksa kembali')
+    }
+  }
+
+  cariHasil(){
+    const {selectedSenar, selectedBahan, selectedHarga, selectedFrets, selectedMerk} = this.state;
+    let Filter = {
+        senar : selectedSenar.Value,
+        harga_awal : selectedHarga.Awal,
+        harga_akhir: selectedHarga.Akhir,
+        frets: selectedFrets.Value,
+        bahan: selectedBahan.Value
+      }
+    fetch (
+      'https://kumpulan-soal-smp.000webhostapp.com/gitar/getGitar.php',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify ({
+          harga_awal: Filter.harga_awal,
+          harga_akhir: Filter.harga_akhir,
+          frets: Filter.frets,
+          bahan: Filter.bahan,
+          senar: Filter.senar,
+        }),
+      }
+    )
+      .then (response => response.json ())
+      .then (responseJson => {
+        //console.log(responseJson);
+        if(responseJson=='Tidak'){
+          this.props.navigation.navigate('Hasil',{
+            data: null,
+            filter: Filter,
+            isAvailable: false
+          })
+        }else{
+          this.props.navigation.navigate('Hasil',{
+            data: responseJson,
+            filter: Filter,
+            isAvailable: true
+          })        
+        }
+      }).catch((err)=>{
+        alert(err)
+      })
+  }
+
 
   render() {
     return (
       <View style={{paddingTop:24, flex:1}}>
         <Header style={{backgroundColor:'#08AE9E'}}>
           <Left>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=>this.props.navigation.goBack()}>
               <Ionicons name="ios-arrow-back" size={32} color="white"/>
             </TouchableOpacity>
           </Left>
@@ -98,7 +164,7 @@ export default class MenuScreen extends Component {
             <Text style={{fontSize:20, color:'white'}}>Pencarian Gitar</Text>
           </Body>
           <Right>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={()=>this.props.navigation.navigate('Home')}>
               <Ionicons name="ios-home" size={32} color="white"/>
             </TouchableOpacity>
           </Right>
@@ -145,7 +211,7 @@ export default class MenuScreen extends Component {
                 autoSort={true}
               />
             </View>
-            <View style={{width:'80%', paddingBottom:10}}>
+            {/* <View style={{width:'80%', paddingBottom:10}}>
               <View style={{paddingLeft:5}}>
                 <Text>Merek</Text>
               </View>
@@ -164,7 +230,7 @@ export default class MenuScreen extends Component {
                 requireSelection={true}
                 autoSort={true}
               />
-            </View>
+            </View> */}
             
             <View style={{width:'80%', paddingBottom:10}}>
               <View style={{paddingLeft:5}}>
@@ -208,7 +274,7 @@ export default class MenuScreen extends Component {
               />
             </View>
             <View style={{paddingTop:20}}>
-              <Button style={{width:200, alignContent:'center',alignItems:'center', justifyContent:'center', backgroundColor:'#08AE9E'}}>
+              <Button onPress={()=>this.submitFilter()} style={{width:200, alignContent:'center',alignItems:'center', justifyContent:'center', backgroundColor:'#08AE9E'}}>
                 <Text style={{color:'white'}}>Cari Gitar</Text>
               </Button>
             </View>
